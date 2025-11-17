@@ -30,7 +30,7 @@
           <span class="text-md text-gray-500">平台</span>
           <select
             v-model="selectedValue"
-            class="select m-4"
+            class="select m-4 w-[250px]"
             name="source"
             id="source"
           >
