@@ -173,7 +173,7 @@ const searchHandle = () => {
 };
 
 const prevPageHandle = () => {
-  if (prevPage.value == null) {
+  if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
   currentPageNumber.value--;
@@ -186,7 +186,7 @@ const prevPageHandle = () => {
 };
 
 const nextPageHandle = () => {
-  if (nextPage.value == null) {
+  if (nextPage.value == null || prevPage.value == "") {
     return;
   }
   currentPageNumber.value++;
