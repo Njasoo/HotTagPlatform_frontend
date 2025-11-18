@@ -55,15 +55,15 @@
         <!-- list-row包含flex容器 -->
         <li
           v-for="item in newsList"
-          :key="item.id"
+          :key="item?.id"
           class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
           @click="goToURL(item.url)"
         >
           <div class="text-4xl font-thin opacity-30 tabular-nums">
-            {{ item.rank }}
+            {{ item?.rank }}
           </div>
           <div>
-            <span class="text-lg">{{ item.title }}</span>
+            <span class="text-lg">{{ item?.title }}</span>
           </div>
         </li>
       </ul>
@@ -129,9 +129,6 @@ onMounted(() => {
   getHotItems(selectedValue.value)
     .then((res) => {
       console.log(res.data.results);
-      // newsList.value = res.data.results;
-      // prevPage.value = res.data.previous;
-      // nextPage.value = res.data.next;
       setUpNewsList(res);
     })
     .catch((err) => console.error(err));
