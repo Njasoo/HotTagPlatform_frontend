@@ -95,10 +95,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, toHandlerKey, watch } from "vue";
 import { getHotItems } from "../api/hotItem";
 import { getSourceList } from "../api/source";
 import request from "@/api/request";
+import { useThrottle } from "@/composables/useThrottle";
 
 const loading = ref(true);
 const currentPageNumber = ref(1);
@@ -184,7 +185,7 @@ const searchHandle = () => {
   }
 };
 
-const prevPageHandle = () => {
+const prevPageHandle = useThrottle(() => {
   if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
@@ -195,9 +196,9 @@ const prevPageHandle = () => {
       setUpNewsList(res);
     })
     .catch((err: any) => console.error(err));
-};
+});
 
-const nextPageHandle = () => {
+const nextPageHandle = useThrottle(() => {
   if (nextPage.value == null || prevPage.value == "") {
     return;
   }
@@ -208,5 +209,5 @@ const nextPageHandle = () => {
       setUpNewsList(res);
     })
     .catch((err: any) => console.error(err));
-};
+});
 </script>
