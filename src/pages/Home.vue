@@ -151,6 +151,7 @@ onMounted(() => {
 
 watch(selectedValue, (newVal: string) => {
   loading.value = true;
+  currentPageNumber.value = 1;
   getHotItems(newVal)
     .then((res: any) => {
       setUpNewsList(res);
