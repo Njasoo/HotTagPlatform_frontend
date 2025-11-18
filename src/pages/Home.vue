@@ -36,10 +36,10 @@
           >
             <option
               v-for="item in sourceList"
-              :key="item.id"
-              :value="item.value"
+              :key="item?.id"
+              :value="item?.value"
             >
-              {{ item.name }}
+              {{ item?.name }}
             </option>
           </select>
         </div>
@@ -57,7 +57,7 @@
           v-for="item in newsList"
           :key="item?.id"
           class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
-          @click="goToURL(item.url)"
+          @click="goToURL(item?.url)"
         >
           <div class="text-4xl font-thin opacity-30 tabular-nums">
             {{ item?.rank }}
