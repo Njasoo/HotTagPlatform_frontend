@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, toHandlerKey, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "../api/hotItem";
 import { getSourceList } from "../api/source";
 import request from "@/api/request";
