@@ -46,44 +46,50 @@
       </div>
     </div>
     <!-- 主要显示部分 -->
-    <div class="mx-auto w-[95%] mt-3">
-      <ul class="list bg-base-100 shadow-sm">
-        <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
-          {{ selectedPlatform }}今日热榜
-        </li>
+    <span
+      v-if="loading"
+      class="mx-auto block loading loading-spinner loading-xl mt-3"
+    ></span>
+    <div v-else>
+      <div class="mx-auto w-[95%] mt-3">
+        <ul class="list bg-base-100 shadow-sm">
+          <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
+            {{ selectedPlatform }}今日热榜
+          </li>
 
-        <!-- list-row包含flex容器 -->
-        <li
-          v-for="item in newsList"
-          :key="item?.id"
-          class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
-          @click="goToURL(item?.url)"
+          <!-- list-row包含flex容器 -->
+          <li
+            v-for="item in newsList"
+            :key="item?.id"
+            class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
+            @click="goToURL(item?.url)"
+          >
+            <div class="text-4xl font-thin opacity-30 tabular-nums">
+              {{ item?.rank }}
+            </div>
+            <div>
+              <span class="text-lg">{{ item?.title }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="join flex justify-center mt-3">
+        <button
+          class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+          @click="prevPageHandle"
         >
-          <div class="text-4xl font-thin opacity-30 tabular-nums">
-            {{ item?.rank }}
-          </div>
-          <div>
-            <span class="text-lg">{{ item?.title }}</span>
-          </div>
-        </li>
-      </ul>
-    </div>
-    <div class="join flex justify-center mt-3">
-      <button
-        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
-        @click="prevPageHandle"
-      >
-        «
-      </button>
-      <button class="join-item btn bg-white">
-        {{ currentPageNumber }}
-      </button>
-      <button
-        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
-        @click="nextPageHandle"
-      >
-        »
-      </button>
+          «
+        </button>
+        <button class="join-item btn bg-white">
+          {{ currentPageNumber }}
+        </button>
+        <button
+          class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+          @click="nextPageHandle"
+        >
+          »
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -94,6 +100,7 @@ import { getHotItems } from "../api/hotItem";
 import { getSourceList } from "../api/source";
 import request from "@/api/request";
 
+const loading = ref(true);
 const currentPageNumber = ref(1);
 const prevPage = ref("");
 const nextPage = ref("");
@@ -130,6 +137,7 @@ onMounted(() => {
     .then((res) => {
       console.log(res.data.results);
       setUpNewsList(res);
+      loading.value = false;
     })
     .catch((err) => console.error(err));
   getSourceList()
@@ -141,8 +149,12 @@ onMounted(() => {
 });
 
 watch(selectedValue, (newVal: string) => {
+  loading.value = true;
   getHotItems(newVal)
-    .then((res: any) => setUpNewsList(res))
+    .then((res: any) => {
+      setUpNewsList(res);
+      loading.value = false;
+    })
     .catch((err: any) => console.error(err));
   // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
   for (const item of sourceList.value) {
