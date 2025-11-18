@@ -95,8 +95,8 @@ import { getSourceList } from "../api/source";
 import request from "@/api/request";
 
 const currentPageNumber = ref(1);
-const prevPage = ref(null);
-const nextPage = ref(null);
+const prevPage = ref("");
+const nextPage = ref("");
 const searchText = ref("");
 const selectedValue = ref("bilibili");
 const selectedPlatform = ref("哔哩哔哩");
