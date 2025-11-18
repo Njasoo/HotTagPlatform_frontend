@@ -30,7 +30,7 @@
           <span class="text-md text-gray-500">平台</span>
           <select
             v-model="selectedValue"
-            class="select m-4 w-[250px]"
+            class="select m-4 w-auto"
             name="source"
             id="source"
           >
@@ -54,19 +54,36 @@
 
         <!-- list-row包含flex容器 -->
         <li
-          v-for="(item, index) in newsList"
+          v-for="item in newsList"
           :key="item.id"
           class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
           @click="goToURL(item.url)"
         >
           <div class="text-4xl font-thin opacity-30 tabular-nums">
-            {{ index + 1 }}
+            {{ item.rank }}
           </div>
           <div>
             <span class="text-lg">{{ item.title }}</span>
           </div>
         </li>
       </ul>
+    </div>
+    <div class="join flex justify-center mt-3">
+      <button
+        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+        @click="prevPageHandle"
+      >
+        «
+      </button>
+      <button class="join-item btn bg-white">
+        {{ currentPageNumber }}
+      </button>
+      <button
+        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+        @click="nextPageHandle"
+      >
+        »
+      </button>
     </div>
   </div>
 </template>
@@ -75,7 +92,11 @@
 import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "../api/hotItem";
 import { getSourceList } from "../api/source";
+import request from "@/api/request";
 
+const currentPageNumber = ref(1);
+const prevPage = ref(null);
+const nextPage = ref(null);
 const searchText = ref("");
 const selectedValue = ref("bilibili");
 const selectedPlatform = ref("哔哩哔哩");
@@ -96,24 +117,36 @@ interface SourceItem {
 }
 const newsList = ref<NewsItem[]>([]);
 const sourceList = ref<SourceItem[]>([]);
+
+const setUpNewsList = (res: any) => {
+  // 没办法，drf返回的数据太复杂了，只能any了
+  newsList.value = res.data.results;
+  prevPage.value = res.data.previous;
+  nextPage.value = res.data.next;
+};
+
 onMounted(() => {
   getHotItems(selectedValue.value)
     .then((res) => {
-      console.log(res.data);
-      newsList.value = res.data;
+      console.log(res.data.results);
+      // newsList.value = res.data.results;
+      // prevPage.value = res.data.previous;
+      // nextPage.value = res.data.next;
+      setUpNewsList(res);
     })
     .catch((err) => console.error(err));
   getSourceList()
     .then((res) => {
-      console.log(res.data);
+      console.log("source_list:", res.data);
       sourceList.value = res.data;
     })
     .catch((err) => console.error(err));
 });
+
 watch(selectedValue, (newVal: string) => {
   getHotItems(newVal)
-    .then((res) => (newsList.value = res.data))
-    .catch((err) => console.error(err));
+    .then((res: any) => setUpNewsList(res))
+    .catch((err: any) => console.error(err));
   // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
   for (const item of sourceList.value) {
     if (item.value == newVal) {
@@ -121,9 +154,11 @@ watch(selectedValue, (newVal: string) => {
     }
   }
 });
+
 const goToURL = (url: string) => {
   window.open(url, "_blank");
 };
+
 const searchHandle = () => {
   if (selectedValue.value == "zhihu") {
     window.open(
@@ -138,5 +173,31 @@ const searchHandle = () => {
       "_blank"
     );
   }
+};
+
+const prevPageHandle = () => {
+  if (prevPage.value == null) {
+    return;
+  }
+  currentPageNumber.value--;
+  request
+    .get(prevPage.value)
+    .then((res: any) => {
+      setUpNewsList(res);
+    })
+    .catch((err: any) => console.error(err));
+};
+
+const nextPageHandle = () => {
+  if (nextPage.value == null) {
+    return;
+  }
+  currentPageNumber.value++;
+  request
+    .get(nextPage.value)
+    .then((res: any) => {
+      setUpNewsList(res);
+    })
+    .catch((err: any) => console.error(err));
 };
 </script>
