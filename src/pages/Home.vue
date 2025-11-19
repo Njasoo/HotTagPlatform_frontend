@@ -79,7 +79,6 @@ const pages: Page[] = [
   { name: "首页", value: "/newsList" },
   { name: "词云", value: "/wordcloud" },
 ];
-const selectedPage = ref<string>("newsList");
 const searchText = ref<string>("");
 const selectedValue = ref<string>("bilibili");
 const selectedPlatform = ref<string>("哔哩哔哩");
@@ -123,7 +122,6 @@ const searchHandle = () => {
 };
 
 const selectPageHandle = (path: string) => {
-  selectedPage.value = path;
-  router.push(path);
+  router.push({ path: path, query: { t: Date.now() } }); //push一个无用参数，使得和当前url相同的路径也能跳转
 };
 </script>
