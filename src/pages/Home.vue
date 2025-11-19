@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import { getSourceList } from "../api/source";
 import router from "@/router";
 
@@ -76,7 +76,7 @@ interface Page {
   value: string;
 }
 const pages: Page[] = [
-  { name: "首页", value: "/newsList" },
+  { name: "首页", value: "/newslist" },
   { name: "词云", value: "/wordcloud" },
 ];
 const searchText = ref<string>("");
@@ -92,7 +92,9 @@ const sourceList = ref<SourceItem[]>([]);
 
 onMounted(() => {
   getSourceList()
-    .then((res) => (sourceList.value = res.data))
+    .then((res) => {
+      sourceList.value = res.data;
+    })
     .catch((err) => console.error(err));
 });
 
@@ -122,6 +124,6 @@ const searchHandle = () => {
 };
 
 const selectPageHandle = (path: string) => {
-  router.push({ path: path, query: { t: Date.now() } }); //push一个无用参数，使得和当前url相同的路径也能跳转
+  router.push({ path: path }); //push一个无用参数，使得和当前url相同的路径也能跳转
 };
 </script>
