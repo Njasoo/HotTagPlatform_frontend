@@ -69,7 +69,7 @@
     </router-view>
     <div class="mt-3 p-4 container mx-auto text-center">
       © 2025 Jason Wong · Vue 3 · DaisyUI · Django REST Framework · Hugging Face
-      Transformers
+      Transformers · Jieba · Python WordCloud
     </div>
   </div>
 </template>
