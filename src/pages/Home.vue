@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch, computed } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { getSourceList } from "../api/source";
 import router from "@/router";
 
