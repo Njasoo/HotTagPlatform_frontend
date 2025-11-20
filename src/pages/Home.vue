@@ -61,7 +61,11 @@
       </div>
     </div>
     <router-view v-slot="{ Component }">
-      <component :is="Component" :selectedValue="selectedValue"></component>
+      <component
+        :is="Component"
+        :selectedValue="selectedValue"
+        :key="$route.fullPath"
+      ></component>
     </router-view>
   </div>
 </template>
@@ -78,6 +82,11 @@ interface Page {
 const pages: Page[] = [
   { name: "首页", value: "/newslist" },
   { name: "词云", value: "/wordcloud" },
+  { name: "国际新闻", value: "/internation" },
+  { name: "财经新闻", value: "/finance" },
+  { name: "文化", value: "/culture" },
+  { name: "体育", value: "/sports" },
+  { name: "娱乐", value: "/entertainment" },
 ];
 const searchText = ref<string>("");
 const selectedValue = ref<string>("bilibili");

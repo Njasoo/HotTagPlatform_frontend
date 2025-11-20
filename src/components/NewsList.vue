@@ -12,13 +12,13 @@
 
         <!-- list-row包含flex容器 -->
         <li
-          v-for="item in newsList"
+          v-for="(item, index) in newsList"
           :key="item?.id"
           class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
           @click="goToURL(item?.url)"
         >
           <div class="text-4xl font-thin opacity-30 tabular-nums">
-            {{ item?.rank }}
+            {{ index + (currentPageNumber - 1) * 10 + 1 }}
           </div>
           <div>
             <span class="text-lg">{{ item?.title }}</span>
@@ -55,11 +55,18 @@ import { getHotItems } from "@/api/hotItem";
 import { getSourceList } from "@/api/source";
 import request from "@/api/request";
 import { useThrottle } from "@/composables/useThrottle";
+import router from "@/router";
 
-interface Props {
+const page2category: { path: string; category: string }[] = [
+  { path: "/culture", category: "文化" },
+  { path: "/internation", category: "国际新闻" },
+  { path: "/finance", category: "财经新闻" },
+  { path: "/sports", category: "体育" },
+  { path: "/entertainment", category: "娱乐" },
+];
+const props = defineProps<{
   selectedValue: string;
-}
-const props = defineProps<Props>();
+}>();
 const loading = ref(true);
 const currentPageNumber = ref(1);
 const prevPage = ref("");
@@ -73,6 +80,7 @@ interface NewsItem {
   crawl_time: string;
   url: string;
   rank: number;
+  category: string;
 }
 interface SourceItem {
   // 同样的，这个也是写出来给别人看看是什么类型的而已，并没有实际作用
@@ -82,6 +90,7 @@ interface SourceItem {
 }
 const newsList = ref<NewsItem[]>([]);
 const sourceList = ref<SourceItem[]>([]);
+let current_category = "";
 
 const setUpNewsList = (res: any) => {
   // 没办法，drf返回的数据太复杂了，只能any了
@@ -90,20 +99,31 @@ const setUpNewsList = (res: any) => {
   nextPage.value = res.data.next;
 };
 
+watch(
+  () => router.currentRoute.value.path,
+  (new_path) => {
+    const matched = page2category.find((item) => item.path == new_path);
+    if (matched) {
+      current_category = matched.category;
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
-  getHotItems(props.selectedValue)
-    .then((res) => {
+  getHotItems(props.selectedValue, current_category)
+    .then((res: any) => {
       console.log(res.data.results);
       setUpNewsList(res);
       loading.value = false;
     })
-    .catch((err) => console.error(err));
+    .catch((err: any) => console.error(err));
   getSourceList()
-    .then((res) => {
+    .then((res: any) => {
       console.log("source_list:", res.data);
       sourceList.value = res.data;
     })
-    .catch((err) => console.error(err));
+    .catch((err: any) => console.error(err));
 });
 
 watch(
@@ -111,7 +131,7 @@ watch(
   (newVal: string) => {
     loading.value = true;
     currentPageNumber.value = 1;
-    getHotItems(newVal)
+    getHotItems(newVal, current_category)
       .then((res: any) => {
         setUpNewsList(res);
         loading.value = false;
