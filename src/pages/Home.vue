@@ -133,6 +133,10 @@ const searchHandle = () => {
       `https://search.bilibili.com/all?keyword=${searchText.value}`,
       "_blank"
     );
+  } else if (selectedValue.value == "tieba") {
+    window.open(
+      `https://tieba.baidu.com/f?ie=utf-8&kw=${searchText.value}&fr=search`
+    );
   }
 };
 
