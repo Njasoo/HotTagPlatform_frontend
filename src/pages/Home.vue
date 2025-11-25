@@ -1,28 +1,43 @@
 <template>
-  <div class="container mx-auto bg-gray-100 min-h-screen">
-    <nav class="px-6 py-4 shadow-sm bg-white flex">
-      <span class="text-3xl font-bold text-blue-500">Trend</span>
-      <div class="flex items-center space-x-5 mx-5 text-lg text-gray-700">
-        <span
-          v-for="item in pages"
-          :key="item.name"
-          class="hover:text-black hover:font-bold hover:cursor-pointer"
-          :class="
-            router.currentRoute.value.path == item.value
-              ? 'border-b-5 border-blue-500 text-black font-bold'
-              : ''
-          "
-          @click="selectPageHandle(item.value)"
-        >
-          {{ item.name }}
-        </span>
+  <div class="container mx-auto bg-base-200 min-h-screen">
+    <nav
+      class="px-6 py-4 shadow-sm bg-base-100 flex justify-between items-center"
+    >
+      <div class="flex items-center">
+        <span class="text-3xl font-bold text-accent">Trend</span>
+        <div class="flex items-center space-x-5 mx-5 text-lg text-base-content">
+          <span
+            v-for="item in pages"
+            :key="item.name"
+            class="hover:text-accent hover:font-bold hover:cursor-pointer"
+            :class="
+              router.currentRoute.value.path == item.value
+                ? 'border-b-5 border-accent font-bold'
+                : ''
+            "
+            @click="selectPageHandle(item.value)"
+          >
+            {{ item.name }}
+          </span>
+        </div>
       </div>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <span class="text-sm">{{
+          theme === "dark" ? "深色模式" : "浅色模式"
+        }}</span>
+        <input
+          type="checkbox"
+          class="toggle toggle-accent"
+          :checked="theme === 'dark'"
+          @change="toggleTheme"
+        />
+      </label>
     </nav>
     <!-- 过滤部分 -->
-    <div class="mx-auto w-[95%] mt-3 shadow-sm bg-white">
+    <div class="mx-auto w-[95%] mt-3 shadow-sm bg-base-100">
       <div>
         <div class="px-4 pt-4">
-          <span class="text-md text-gray-500">搜索</span>
+          <span class="text-md text-base-content">搜索</span>
           <div class="join ml-4">
             <!-- 输入框 -->
             <input
@@ -34,7 +49,7 @@
             />
             <!-- 按钮 -->
             <button
-              class="btn btn-info text-white join-ite"
+              class="btn btn-accent text-white join-ite"
               @click="searchHandle"
             >
               搜索
@@ -42,7 +57,7 @@
           </div>
         </div>
         <div class="px-4">
-          <span class="text-md text-gray-500">平台</span>
+          <span class="text-md text-base-content">平台</span>
           <select
             v-model="selectedValue"
             class="select m-4 w-auto"
@@ -79,6 +94,7 @@ import { onMounted, ref, watch } from "vue";
 import { getSourceList } from "../api/source";
 import router from "@/router";
 
+const theme = ref(localStorage.getItem("theme") || "light");
 interface Page {
   name: string;
   value: string;
@@ -102,6 +118,16 @@ interface SourceItem {
   value: string;
 }
 const sourceList = ref<SourceItem[]>([]);
+
+const toggleTheme = (event: Event) => {
+  const checked = (event.target as HTMLInputElement).checked;
+  theme.value = checked ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", theme.value);
+  localStorage.setItem("theme", theme.value);
+};
+
+// 初次载入同步主题
+document.documentElement.setAttribute("data-theme", theme.value);
 
 onMounted(() => {
   getSourceList()

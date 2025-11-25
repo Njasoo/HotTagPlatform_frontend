@@ -3,7 +3,7 @@
     v-if="loading"
     class="mx-auto block loading loading-spinner loading-xl mt-3"
   ></span>
-  <div v-else class="mt-3 bg-white w-[95%] container mx-auto shadow-sm p-4">
+  <div v-else class="mt-3 bg-base-100 w-[95%] container mx-auto shadow-sm p-4">
     <img class="mx-auto w-150 h-150" :src="imageUrl" alt="" />
   </div>
 </template>

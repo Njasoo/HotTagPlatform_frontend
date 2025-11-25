@@ -14,7 +14,7 @@
         <li
           v-for="(item, index) in newsList"
           :key="item?.id"
-          class="list-row items-center hover:bg-gray-100 rounded-none hover:cursor-pointer"
+          class="list-row items-center hover:bg-base-300 rounded-none hover:cursor-pointer"
           @click="goToURL(item?.url)"
         >
           <div class="text-4xl font-thin opacity-30 tabular-nums">
@@ -28,18 +28,18 @@
     </div>
     <div class="join flex justify-center mt-3">
       <button
-        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+        class="text-base-content join-item btn bg-base-100 hover:bg-accent"
         id="prev-btn"
         :disabled="prevPage == null"
         @click="prevPageHandle"
       >
         «
       </button>
-      <button class="join-item btn bg-white">
+      <button class="join-item btn bg-base-100">
         {{ currentPageNumber }}
       </button>
       <button
-        class="text-gray-500 join-item btn bg-white hover:bg-gray-100"
+        class="text-base-content join-item btn bg-base-100 hover:bg-accent"
         id="next-btn"
         :disabled="nextPage == null"
         @click="nextPageHandle"
