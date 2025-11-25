@@ -1,9 +1,9 @@
 <template>
-  <!-- <span
-    v-show="loading"
+  <span
+    v-if="loading"
     class="mx-auto block loading loading-spinner loading-xl mt-3"
-  ></span> -->
-  <div>
+  ></span>
+  <div v-else>
     <div class="mx-auto w-[95%] mt-3">
       <ul class="list bg-base-100 shadow-sm">
         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
@@ -129,12 +129,12 @@ onMounted(() => {
 watch(
   () => props.selectedValue,
   (newVal: string) => {
-    loading.value = true;
+    // loading.value = true;
     currentPageNumber.value = 1;
     getHotItems(newVal, current_category)
       .then((res: any) => {
         setUpNewsList(res);
-        loading.value = false;
+        // loading.value = false;
       })
       .catch((err: any) => console.error(err));
     // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
@@ -154,33 +154,33 @@ const prevPageHandle = useThrottleFn(() => {
   if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
-  loading.value = true;
+  // loading.value = true;
   currentPageNumber.value--;
   request
     .get(prevPage.value)
     .then((res: any) => {
-      const lastScroll = window.scrollY;
+      // const lastScroll = window.scrollY;
       setUpNewsList(res);
-      window.scrollTo({ top: lastScroll });
-      loading.value = false;
+      // window.scrollTo({ top: lastScroll });
+      // loading.value = false;
     })
     .catch((err: any) => console.error(err));
-}, 100);
+}, 500);
 
 const nextPageHandle = useThrottleFn(() => {
   if (nextPage.value == null || nextPage.value == "") {
     return;
   }
-  loading.value = true;
+  // loading.value = true;
   currentPageNumber.value++;
   request
     .get(nextPage.value)
     .then((res: any) => {
-      const lastScroll = window.scrollY;
+      // const lastScroll = window.scrollY;
       setUpNewsList(res);
-      window.scrollTo({ top: lastScroll });
-      loading.value = false;
+      // window.scrollTo({ top: lastScroll });
+      // loading.value = false;
     })
     .catch((err: any) => console.error(err));
-}, 100);
+}, 500);
 </script>
