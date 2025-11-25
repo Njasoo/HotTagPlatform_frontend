@@ -1,9 +1,9 @@
 <template>
-  <span
-    v-if="loading"
+  <!-- <span
+    v-show="loading"
     class="mx-auto block loading loading-spinner loading-xl mt-3"
-  ></span>
-  <div v-else>
+  ></span> -->
+  <div>
     <div class="mx-auto w-[95%] mt-3">
       <ul class="list bg-base-100 shadow-sm">
         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
@@ -20,7 +20,7 @@
           <div class="text-4xl font-thin opacity-30 tabular-nums">
             {{ index + (currentPageNumber - 1) * 10 + 1 }}
           </div>
-          <div>
+          <div :class="loading ? 'skeleton' : ''">
             <span class="text-lg">{{ item?.title }}</span>
           </div>
         </li>
@@ -54,8 +54,8 @@ import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "@/api/hotItem";
 import { getSourceList } from "@/api/source";
 import request from "@/api/request";
-import { useThrottle } from "@/composables/useThrottle";
 import router from "@/router";
+import { useThrottleFn } from "@vueuse/core";
 
 const page2category: { path: string; category: string }[] = [
   { path: "/culture", category: "文化" },
@@ -150,29 +150,37 @@ const goToURL = (url: string) => {
   window.open(url, "_blank");
 };
 
-const prevPageHandle = useThrottle(() => {
+const prevPageHandle = useThrottleFn(() => {
   if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
+  loading.value = true;
   currentPageNumber.value--;
   request
     .get(prevPage.value)
     .then((res: any) => {
+      const lastScroll = window.scrollY;
       setUpNewsList(res);
+      window.scrollTo({ top: lastScroll });
+      loading.value = false;
     })
     .catch((err: any) => console.error(err));
-});
+}, 100);
 
-const nextPageHandle = useThrottle(() => {
+const nextPageHandle = useThrottleFn(() => {
   if (nextPage.value == null || nextPage.value == "") {
     return;
   }
+  loading.value = true;
   currentPageNumber.value++;
   request
     .get(nextPage.value)
     .then((res: any) => {
+      const lastScroll = window.scrollY;
       setUpNewsList(res);
+      window.scrollTo({ top: lastScroll });
+      loading.value = false;
     })
     .catch((err: any) => console.error(err));
-});
+}, 100);
 </script>
