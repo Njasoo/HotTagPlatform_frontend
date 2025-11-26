@@ -111,7 +111,6 @@ const pages: Page[] = [
   { name: "娱乐", value: "/entertainment" },
 ];
 const searchText = ref<string>("");
-const selectedValue = ref<string>("bilibili");
 const selectedPlatform = ref<string>("哔哩哔哩");
 interface SourceItem {
   // 同样的，这个也是写出来给别人看看是什么类型的而已，并没有实际作用
