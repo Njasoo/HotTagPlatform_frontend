@@ -118,9 +118,7 @@ onMounted(() => {
       setUpNewsList(res);
     })
     .finally(() => {
-      setTimeout(() => {
-        g_loading.value = false;
-      }, 500);
+      g_loading.value = false;
     })
     .catch((err: any) => console.error(err));
   getSourceList()
@@ -141,9 +139,7 @@ watch(
         setUpNewsList(res);
       })
       .finally(() => {
-        setTimeout(() => {
-          loading.value = false;
-        }, 500);
+        loading.value = false;
       })
       .catch((err: any) => console.error(err));
     // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
@@ -171,9 +167,7 @@ const prevPageHandle = useThrottleFn(() => {
       setUpNewsList(res);
     })
     .finally(() => {
-      setTimeout(() => {
-        loading.value = false;
-      }, 500);
+      loading.value = false;
     })
     .catch((err: any) => console.error(err));
 }, 500);
@@ -190,9 +184,7 @@ const nextPageHandle = useThrottleFn(() => {
       setUpNewsList(res);
     })
     .finally(() => {
-      setTimeout(() => {
-        loading.value = false;
-      }, 500);
+      loading.value = false;
     })
     .catch((err: any) => console.error(err));
 }, 500);
