@@ -102,7 +102,7 @@ interface Page {
   value: string;
 }
 const pages: Page[] = [
-  { name: "首页", value: "/newslist" },
+  { name: "总热榜", value: "/newslist" },
   { name: "词云", value: "/wordcloud" },
   { name: "国际新闻", value: "/internation" },
   { name: "财经新闻", value: "/finance" },
