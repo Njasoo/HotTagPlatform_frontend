@@ -59,7 +59,7 @@
         <div class="px-4">
           <span class="text-md text-base-content">平台</span>
           <select
-            v-model="selectedValue"
+            v-model="newsStore.current_platform"
             class="select m-4 w-auto"
             name="source"
             id="source"
@@ -78,10 +78,10 @@
     <router-view v-slot="{ Component }">
       <component
         :is="Component"
-        :selectedValue="selectedValue"
+        :selectedValue="newsStore.current_platform"
         :key="$route.fullPath"
-      ></component>
-    </router-view>
+      ></component> </router-view
+    >；
     <div class="mt-3 p-4 container mx-auto text-center">
       © 2025 Jason Wong · Vue 3 · DaisyUI · Django REST Framework · Hugging Face
       Transformers · Jieba · Python WordCloud
@@ -93,7 +93,9 @@
 import { onMounted, ref, watch } from "vue";
 import { getSourceList } from "../api/source";
 import router from "@/router";
+import { useNewsStore } from "@/stores/news";
 
+const newsStore = useNewsStore();
 const theme = ref(localStorage.getItem("theme") || "light");
 interface Page {
   name: string;
@@ -137,29 +139,32 @@ onMounted(() => {
     .catch((err) => console.error(err));
 });
 
-watch(selectedValue, (newVal: string) => {
-  // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
-  for (const item of sourceList.value) {
-    if (item.value == newVal) {
-      selectedPlatform.value = item.name;
+watch(
+  () => newsStore.current_platform,
+  (newVal: string) => {
+    // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
+    for (const item of sourceList.value) {
+      if (item.value == newVal) {
+        selectedPlatform.value = item.name;
+      }
     }
   }
-});
+);
 
 const searchHandle = () => {
-  if (selectedValue.value == "zhihu") {
+  if (newsStore.current_platform == "zhihu") {
     window.open(
       `https://www.zhihu.com/search?type=content&q=${searchText.value}`,
       "_blank"
     );
-  } else if (selectedValue.value == "weibo") {
+  } else if (newsStore.current_platform == "weibo") {
     window.open(`https://s.weibo.com/weibo?q=${searchText.value}`, "_blank");
-  } else if (selectedValue.value == "bilibili") {
+  } else if (newsStore.current_platform == "bilibili") {
     window.open(
       `https://search.bilibili.com/all?keyword=${searchText.value}`,
       "_blank"
     );
-  } else if (selectedValue.value == "tieba") {
+  } else if (newsStore.current_platform == "tieba") {
     window.open(
       `https://tieba.baidu.com/f?ie=utf-8&kw=${searchText.value}&fr=search`
     );

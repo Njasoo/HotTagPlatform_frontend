@@ -1,6 +1,6 @@
 <template>
   <span
-    v-if="loading"
+    v-if="g_loading"
     class="mx-auto block loading loading-spinner loading-xl mt-3"
   ></span>
   <div v-else>
@@ -20,8 +20,8 @@
           <div class="text-4xl font-thin opacity-30 tabular-nums">
             {{ index + (currentPageNumber - 1) * 10 + 1 }}
           </div>
-          <div :class="loading ? 'skeleton' : ''">
-            <span class="text-lg">{{ item?.title }}</span>
+          <div :class="loading ? 'skeleton h-6 w-full' : ''">
+            <span class="text-lg" v-show="!loading">{{ item?.title }}</span>
           </div>
         </li>
       </ul>
@@ -67,7 +67,8 @@ const page2category: { path: string; category: string }[] = [
 const props = defineProps<{
   selectedValue: string;
 }>();
-const loading = ref(true);
+const g_loading = ref(true);
+const loading = ref(false);
 const currentPageNumber = ref(1);
 const prevPage = ref("");
 const nextPage = ref("");
@@ -115,7 +116,11 @@ onMounted(() => {
     .then((res: any) => {
       console.log(res.data.results);
       setUpNewsList(res);
-      loading.value = false;
+    })
+    .finally(() => {
+      setTimeout(() => {
+        g_loading.value = false;
+      }, 500);
     })
     .catch((err: any) => console.error(err));
   getSourceList()
@@ -129,12 +134,16 @@ onMounted(() => {
 watch(
   () => props.selectedValue,
   (newVal: string) => {
-    // loading.value = true;
+    loading.value = true;
     currentPageNumber.value = 1;
     getHotItems(newVal, current_category)
       .then((res: any) => {
         setUpNewsList(res);
-        // loading.value = false;
+      })
+      .finally(() => {
+        setTimeout(() => {
+          loading.value = false;
+        }, 500);
       })
       .catch((err: any) => console.error(err));
     // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
@@ -154,15 +163,17 @@ const prevPageHandle = useThrottleFn(() => {
   if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
-  // loading.value = true;
+  loading.value = true;
   currentPageNumber.value--;
   request
     .get(prevPage.value)
     .then((res: any) => {
-      // const lastScroll = window.scrollY;
       setUpNewsList(res);
-      // window.scrollTo({ top: lastScroll });
-      // loading.value = false;
+    })
+    .finally(() => {
+      setTimeout(() => {
+        loading.value = false;
+      }, 500);
     })
     .catch((err: any) => console.error(err));
 }, 500);
@@ -171,15 +182,17 @@ const nextPageHandle = useThrottleFn(() => {
   if (nextPage.value == null || nextPage.value == "") {
     return;
   }
-  // loading.value = true;
+  loading.value = true;
   currentPageNumber.value++;
   request
     .get(nextPage.value)
     .then((res: any) => {
-      // const lastScroll = window.scrollY;
       setUpNewsList(res);
-      // window.scrollTo({ top: lastScroll });
-      // loading.value = false;
+    })
+    .finally(() => {
+      setTimeout(() => {
+        loading.value = false;
+      }, 500);
     })
     .catch((err: any) => console.error(err));
 }, 500);
