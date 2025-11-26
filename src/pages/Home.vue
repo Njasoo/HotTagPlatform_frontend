@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto bg-base-200 min-h-screen">
     <nav
-      class="px-6 py-4 shadow-sm bg-base-100 flex justify-between items-center"
+      class="overflow-x-auto px-6 py-4 shadow-sm bg-base-100 flex justify-between items-center whitespace-nowrap"
     >
       <div class="flex items-center">
         <span class="text-3xl font-bold text-accent">Trend</span>
