@@ -12,6 +12,13 @@
 
         <!-- list-row包含flex容器 -->
         <li
+          v-if="!loading && newsList.length === 0"
+          class="p-4 text-center text-sm opacity-60"
+        >
+          暂无新闻
+        </li>
+        <li
+          v-else
           v-for="(item, index) in newsList"
           :key="item?.id"
           class="list-row items-center hover:bg-base-300 rounded-none hover:cursor-pointer"
@@ -50,14 +57,20 @@
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "@/api/hotItem";
-import { getSourceList } from "@/api/source";
+// import { getSourceList } from "@/api/source";
 import request from "@/api/request";
 import router from "@/router";
 import { useThrottleFn } from "@vueuse/core";
 import { useNewsStore } from "@/stores/news";
 
+interface SourceItem {
+  // 同样的，这个也是写出来给别人看看是什么类型的而已，并没有实际作用
+  id: number;
+  name: string;
+  value: string;
+}
 const newsStore = useNewsStore();
 const page2category: { path: string; category: string }[] = [
   { path: "/culture", category: "文化" },
@@ -70,7 +83,9 @@ const page2category: { path: string; category: string }[] = [
 ];
 const props = defineProps<{
   selectedValue: string;
+  sourceList: SourceItem[];
 }>();
+const min_loading_time = 250;
 const g_loading = ref(true);
 const loading = ref(false);
 const currentPageNumber = ref(1);
@@ -87,14 +102,8 @@ interface NewsItem {
   rank: number;
   category: string;
 }
-interface SourceItem {
-  // 同样的，这个也是写出来给别人看看是什么类型的而已，并没有实际作用
-  id: number;
-  name: string;
-  value: string;
-}
 const newsList = ref<NewsItem[]>([]);
-const sourceList = ref<SourceItem[]>([]);
+// const sourceList = ref<SourceItem[]>([]);
 let current_category = "";
 
 const setUpNewsList = (res: any) => {
@@ -116,21 +125,26 @@ watch(
 );
 
 onMounted(() => {
+  const start = Date.now();
   getHotItems(props.selectedValue, current_category)
     .then((res: any) => {
       console.log(res.data.results);
       setUpNewsList(res);
     })
-    .finally(() => {
+    .finally(async () => {
+      const cost = Date.now() - start;
+      if (cost < min_loading_time) {
+        await new Promise((res) => setTimeout(res, min_loading_time - cost));
+      }
       g_loading.value = false;
     })
     .catch((err: any) => console.error(err));
-  getSourceList()
-    .then((res: any) => {
-      console.log("source_list:", res.data);
-      sourceList.value = res.data;
-    })
-    .catch((err: any) => console.error(err));
+  // getSourceList()
+  //   .then((res: any) => {
+  //     console.log("source_list:", res.data);
+  //     sourceList.value = res.data;
+  //   })
+  //   .catch((err: any) => console.error(err));
 });
 
 watch(
@@ -138,17 +152,21 @@ watch(
   (newVal: string) => {
     loading.value = true;
     currentPageNumber.value = 1;
+    const start = Date.now();
     getHotItems(newVal, current_category)
       .then((res: any) => {
         setUpNewsList(res);
       })
       .finally(async () => {
-        await nextTick();
+        const cost = Date.now() - start;
+        if (cost < min_loading_time) {
+          await new Promise((res) => setTimeout(res, min_loading_time - cost));
+        }
         loading.value = false;
       })
       .catch((err: any) => console.error(err));
     // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
-    for (const item of sourceList.value) {
+    for (const item of props.sourceList) {
       if (item.value == newVal) {
         newsStore.current_platform_zh = item.name;
       }
@@ -166,13 +184,17 @@ const prevPageHandle = useThrottleFn(() => {
   }
   loading.value = true;
   currentPageNumber.value--;
+  const start = Date.now();
   request
     .get(prevPage.value)
     .then((res: any) => {
       setUpNewsList(res);
     })
     .finally(async () => {
-      await nextTick();
+      const cost = Date.now() - start;
+      if (cost < min_loading_time) {
+        await new Promise((res) => setTimeout(res, min_loading_time - cost));
+      }
       loading.value = false;
     })
     .catch((err: any) => console.error(err));
@@ -183,6 +205,7 @@ const nextPageHandle = useThrottleFn(() => {
     return;
   }
   loading.value = true;
+  const start = Date.now();
   currentPageNumber.value++;
   request
     .get(nextPage.value)
@@ -190,7 +213,11 @@ const nextPageHandle = useThrottleFn(() => {
       setUpNewsList(res);
     })
     .finally(async () => {
-      await nextTick();
+      const cost = Date.now() - start;
+      const min_loading_time = 250;
+      if (cost < min_loading_time) {
+        await new Promise((res) => setTimeout(res, min_loading_time - cost));
+      }
       loading.value = false;
     })
     .catch((err: any) => console.error(err));

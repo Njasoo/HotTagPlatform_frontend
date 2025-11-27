@@ -79,6 +79,7 @@
       <component
         :is="Component"
         :selectedValue="newsStore.current_platform"
+        :sourceList="sourceList"
         :key="$route.fullPath"
       ></component>
     </router-view>
