@@ -50,7 +50,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { getHotItems } from "@/api/hotItem";
 import { getSourceList } from "@/api/source";
 import request from "@/api/request";
@@ -142,7 +142,8 @@ watch(
       .then((res: any) => {
         setUpNewsList(res);
       })
-      .finally(() => {
+      .finally(async () => {
+        await nextTick();
         loading.value = false;
       })
       .catch((err: any) => console.error(err));
@@ -170,7 +171,8 @@ const prevPageHandle = useThrottleFn(() => {
     .then((res: any) => {
       setUpNewsList(res);
     })
-    .finally(() => {
+    .finally(async () => {
+      await nextTick();
       loading.value = false;
     })
     .catch((err: any) => console.error(err));
@@ -187,7 +189,8 @@ const nextPageHandle = useThrottleFn(() => {
     .then((res: any) => {
       setUpNewsList(res);
     })
-    .finally(() => {
+    .finally(async () => {
+      await nextTick();
       loading.value = false;
     })
     .catch((err: any) => console.error(err));
