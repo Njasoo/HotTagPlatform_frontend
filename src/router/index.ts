@@ -43,6 +43,16 @@ const routes = [
         name: "Culture",
         component: () => import("@/components/NewsList.vue"),
       },
+      {
+        path: "/gangao",
+        name: "Gangao",
+        component: () => import("@/components/NewsList.vue"),
+      },
+      {
+        path: "/mainland",
+        name: "Mainland",
+        component: () => import("@/components/NewsList.vue"),
+      },
     ],
   },
 ];

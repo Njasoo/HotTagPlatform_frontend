@@ -65,6 +65,8 @@ const page2category: { path: string; category: string }[] = [
   { path: "/finance", category: "财经新闻" },
   { path: "/sports", category: "体育" },
   { path: "/entertainment", category: "娱乐" },
+  { path: "/gangao", category: "港澳政治" },
+  { path: "/mainland", category: "中国大陆政治" },
 ];
 const props = defineProps<{
   selectedValue: string;

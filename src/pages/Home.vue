@@ -109,6 +109,8 @@ const pages: Page[] = [
   { name: "文化", value: "/culture" },
   { name: "体育", value: "/sports" },
   { name: "娱乐", value: "/entertainment" },
+  { name: "中国大陆", value: "/mainland" },
+  { name: "港澳", value: "/gangao" },
 ];
 const searchText = ref<string>("");
 const selectedPlatform = ref<string>("哔哩哔哩");
