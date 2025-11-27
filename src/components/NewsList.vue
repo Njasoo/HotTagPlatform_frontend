@@ -102,7 +102,20 @@ interface NewsItem {
   rank: number;
   category: string;
 }
-const newsList = ref<NewsItem[]>([]);
+const tempNewsItem = {
+  id: 0,
+  title: "",
+  source: "",
+  crawl_time: "",
+  url: "",
+  rank: 0,
+  category: "",
+};
+const newsList = ref<NewsItem[]>(
+  new Array(10)
+    .fill(null as unknown as NewsItem)
+    .map(() => ({ ...tempNewsItem }))
+);
 // const sourceList = ref<SourceItem[]>([]);
 let current_category = "";
 
