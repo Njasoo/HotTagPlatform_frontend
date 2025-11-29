@@ -18,41 +18,6 @@ const routes = [
         name: "WordCloud",
         component: () => import("@/components/WordCloud.vue"),
       },
-      {
-        path: "/internation",
-        name: "Internation",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/finance",
-        name: "Finance",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/sports",
-        name: "Sports",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/entertainment",
-        name: "Entertainment",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/culture",
-        name: "Culture",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/gangao",
-        name: "Gangao",
-        component: () => import("@/components/NewsList.vue"),
-      },
-      {
-        path: "/mainland",
-        name: "Mainland",
-        component: () => import("@/components/NewsList.vue"),
-      },
     ],
   },
 ];

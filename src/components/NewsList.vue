@@ -4,6 +4,22 @@
     class="mx-auto block loading loading-spinner loading-xl mt-3"
   ></span>
   <div v-else>
+    <div
+      class="flex mx-auto space-x-5 bg-base-100 p-4 mt-3 shadow-sm w-[95%] overflow-x-auto flex-nowrap items-center"
+    >
+      <div
+        v-for="item in newsStore.current_categories"
+        :key="item.text"
+        class="flex flex-row items-center shrink-0 space-x-1"
+      >
+        <span class="text-sm mx-1">{{ item?.text }}</span>
+        <input
+          type="checkbox"
+          class="checkbox checkbox-sm"
+          v-model="item.checked"
+        />
+      </div>
+    </div>
     <div class="mx-auto w-[95%] mt-3">
       <ul class="list bg-base-100 shadow-sm">
         <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">
@@ -59,10 +75,8 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "@/api/hotItem";
-// import { getSourceList } from "@/api/source";
 import request from "@/api/request";
-import router from "@/router";
-import { useThrottleFn } from "@vueuse/core";
+import { useThrottleFn, useDebounceFn } from "@vueuse/core";
 import { useNewsStore } from "@/stores/news";
 
 interface SourceItem {
@@ -72,15 +86,6 @@ interface SourceItem {
   value: string;
 }
 const newsStore = useNewsStore();
-const page2category: { path: string; category: string }[] = [
-  { path: "/culture", category: "文化" },
-  { path: "/internation", category: "国际新闻" },
-  { path: "/finance", category: "财经新闻" },
-  { path: "/sports", category: "体育" },
-  { path: "/entertainment", category: "娱乐" },
-  { path: "/gangao", category: "港澳政治" },
-  { path: "/mainland", category: "中国大陆政治" },
-];
 const props = defineProps<{
   selectedValue: string;
   sourceList: SourceItem[];
@@ -116,8 +121,48 @@ const newsList = ref<NewsItem[]>(
     .fill(null as unknown as NewsItem)
     .map(() => ({ ...tempNewsItem }))
 );
+
+const initializeNewsList = () => {
+  newsList.value = new Array(10)
+    .fill(null as unknown as NewsItem)
+    .map(() => ({ ...tempNewsItem }));
+};
 // const sourceList = ref<SourceItem[]>([]);
-let current_category = "";
+let current_categories: string[] = [];
+
+const fetchNews = useDebounceFn((arr) => {
+  current_categories = [];
+  for (const item of arr) {
+    if (item.checked) {
+      current_categories.push(item.category);
+    }
+  }
+  const start = Date.now();
+  loading.value = true;
+  initializeNewsList();
+  getHotItems(newsStore.current_platform, current_categories)
+    .then((res: any) => {
+      console.log(res.data.results);
+      setUpNewsList(res);
+    })
+    .finally(async () => {
+      const cost = Date.now() - start;
+      if (cost < min_loading_time) {
+        await new Promise((res) => setTimeout(res, min_loading_time - cost));
+      }
+      loading.value = false;
+    })
+    .catch((err: any) => console.error(err));
+  console.log("current_categories:", current_categories);
+}, 300);
+
+watch(
+  () => newsStore.current_categories,
+  (arr) => {
+    fetchNews(arr);
+  },
+  { deep: true }
+);
 
 const setUpNewsList = (res: any) => {
   // 没办法，drf返回的数据太复杂了，只能any了
@@ -126,20 +171,14 @@ const setUpNewsList = (res: any) => {
   nextPage.value = res.data.next;
 };
 
-watch(
-  () => router.currentRoute.value.path,
-  (new_path) => {
-    const matched = page2category.find((item) => item.path == new_path);
-    if (matched) {
-      current_category = matched.category;
-    }
-  },
-  { immediate: true }
-);
-
 onMounted(() => {
+  for (const item of newsStore.current_categories) {
+    if (item.checked) {
+      current_categories.push(item.category);
+    }
+  }
   const start = Date.now();
-  getHotItems(props.selectedValue, current_category)
+  getHotItems(props.selectedValue, current_categories)
     .then((res: any) => {
       console.log(res.data.results);
       setUpNewsList(res);
@@ -152,12 +191,6 @@ onMounted(() => {
       g_loading.value = false;
     })
     .catch((err: any) => console.error(err));
-  // getSourceList()
-  //   .then((res: any) => {
-  //     console.log("source_list:", res.data);
-  //     sourceList.value = res.data;
-  //   })
-  //   .catch((err: any) => console.error(err));
 });
 
 watch(
@@ -166,7 +199,7 @@ watch(
     loading.value = true;
     currentPageNumber.value = 1;
     const start = Date.now();
-    getHotItems(newVal, current_category)
+    getHotItems(newVal, current_categories)
       .then((res: any) => {
         setUpNewsList(res);
       })
@@ -198,6 +231,7 @@ const prevPageHandle = useThrottleFn(() => {
   loading.value = true;
   currentPageNumber.value--;
   const start = Date.now();
+  initializeNewsList();
   request
     .get(prevPage.value)
     .then((res: any) => {
@@ -220,6 +254,7 @@ const nextPageHandle = useThrottleFn(() => {
   loading.value = true;
   const start = Date.now();
   currentPageNumber.value++;
+  initializeNewsList();
   request
     .get(nextPage.value)
     .then((res: any) => {
