@@ -130,7 +130,9 @@ const initializeNewsList = () => {
 // const sourceList = ref<SourceItem[]>([]);
 let current_categories: string[] = [];
 
-const fetchNews = useDebounceFn((arr) => {
+const fetchNews = useDebounceFn(() => {
+  const arr = newsStore.current_categories;
+  currentPageNumber.value = 1;
   current_categories = [];
   for (const item of arr) {
     if (item.checked) {
@@ -158,8 +160,8 @@ const fetchNews = useDebounceFn((arr) => {
 
 watch(
   () => newsStore.current_categories,
-  (arr) => {
-    fetchNews(arr);
+  () => {
+    fetchNews();
   },
   { deep: true }
 );
@@ -172,6 +174,7 @@ const setUpNewsList = (res: any) => {
 };
 
 onMounted(() => {
+  initializeNewsList();
   for (const item of newsStore.current_categories) {
     if (item.checked) {
       current_categories.push(item.category);
@@ -195,28 +198,8 @@ onMounted(() => {
 
 watch(
   () => props.selectedValue,
-  (newVal: string) => {
-    loading.value = true;
-    currentPageNumber.value = 1;
-    const start = Date.now();
-    getHotItems(newVal, current_categories)
-      .then((res: any) => {
-        setUpNewsList(res);
-      })
-      .finally(async () => {
-        const cost = Date.now() - start;
-        if (cost < min_loading_time) {
-          await new Promise((res) => setTimeout(res, min_loading_time - cost));
-        }
-        loading.value = false;
-      })
-      .catch((err: any) => console.error(err));
-    // 这里是直接暴力的，因为数据量比较小，所以用map可能常数还比较大的
-    for (const item of props.sourceList) {
-      if (item.value == newVal) {
-        newsStore.current_platform_zh = item.name;
-      }
-    }
+  () => {
+    fetchNews();
   }
 );
 
