@@ -58,8 +58,14 @@
       >
         «
       </button>
-      <button class="join-item btn bg-base-100 shadow-sm">
-        {{ currentPageNumber }}
+      <button
+        class="join-item btn shadow-sm"
+        v-for="item in page_list"
+        :key="item"
+        :class="currentPageNumber == item ? 'bg-accent' : 'bg-base-100'"
+        @click="pageJumpHandle(item)"
+      >
+        {{ item }}
       </button>
       <button
         class="text-base-content join-item btn bg-base-100 hover:bg-accent shadow-sm"
@@ -75,8 +81,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { getHotItems } from "@/api/hotItem";
-import request from "@/api/request";
-import { useThrottleFn, useDebounceFn } from "@vueuse/core";
+import { useDebounceFn } from "@vueuse/core";
 import { useNewsStore } from "@/stores/news";
 
 interface SourceItem {
@@ -85,6 +90,8 @@ interface SourceItem {
   name: string;
   value: string;
 }
+const page_size = 10;
+const page_list = ref<number[]>([]);
 const newsStore = useNewsStore();
 const props = defineProps<{
   selectedValue: string;
@@ -96,6 +103,7 @@ const loading = ref(false);
 const currentPageNumber = ref(1);
 const prevPage = ref("");
 const nextPage = ref("");
+let total_pages = 0;
 const source2zh: { key: string; value: string }[] = [
   { key: "weibo", value: "微博" },
   { key: "tieba", value: "贴吧" },
@@ -136,9 +144,19 @@ const initializeNewsList = () => {
 // const sourceList = ref<SourceItem[]>([]);
 let current_categories: string[] = [];
 
-const fetchNews = useDebounceFn(() => {
+const setUpNewsList = (res: any) => {
+  // 没办法，drf返回的数据太复杂了，只能any了
+  newsList.value = res.data.results;
+  prevPage.value = res.data.previous;
+  nextPage.value = res.data.next;
+  console.log("当前页码:", currentPageNumber.value);
+  console.log("prevPage:", prevPage.value);
+  console.log("nextPage:", nextPage);
+};
+
+const fetchNews = useDebounceFn((page_number: number = 1) => {
   const arr = newsStore.current_categories;
-  currentPageNumber.value = 1;
+  currentPageNumber.value = page_number;
   current_categories = [];
   for (const item of arr) {
     if (item.checked) {
@@ -148,9 +166,15 @@ const fetchNews = useDebounceFn(() => {
   const start = Date.now();
   loading.value = true;
   initializeNewsList();
-  getHotItems(newsStore.current_platform, current_categories)
+  getHotItems(newsStore.current_platform, current_categories, page_number)
     .then((res: any) => {
       console.log(res.data.results);
+      const count = res.data.count;
+      total_pages = Math.ceil(count / page_size);
+      page_list.value = [];
+      for (let i = 1; i <= total_pages; i++) {
+        page_list.value.push(i);
+      }
       setUpNewsList(res);
     })
     .finally(async () => {
@@ -172,34 +196,10 @@ watch(
   { deep: true }
 );
 
-const setUpNewsList = (res: any) => {
-  // 没办法，drf返回的数据太复杂了，只能any了
-  newsList.value = res.data.results;
-  prevPage.value = res.data.previous;
-  nextPage.value = res.data.next;
-};
-
-onMounted(() => {
-  initializeNewsList();
-  for (const item of newsStore.current_categories) {
-    if (item.checked) {
-      current_categories.push(item.category);
-    }
-  }
-  const start = Date.now();
-  getHotItems(props.selectedValue, current_categories)
-    .then((res: any) => {
-      console.log(res.data.results);
-      setUpNewsList(res);
-    })
-    .finally(async () => {
-      const cost = Date.now() - start;
-      if (cost < min_loading_time) {
-        await new Promise((res) => setTimeout(res, min_loading_time - cost));
-      }
-      g_loading.value = false;
-    })
-    .catch((err: any) => console.error(err));
+onMounted(async () => {
+  g_loading.value = true;
+  await fetchNews(1);
+  g_loading.value = false;
 });
 
 const changePlatform = (key: string) => {
@@ -223,50 +223,34 @@ const goToURL = (url: string) => {
   window.open(url, "_blank");
 };
 
-const prevPageHandle = useThrottleFn(() => {
+const prevPageHandle = () => {
   if (prevPage.value == "" || prevPage.value == null) {
     return;
   }
-  loading.value = true;
-  currentPageNumber.value--;
-  const start = Date.now();
-  initializeNewsList();
-  request
-    .get(prevPage.value)
-    .then((res: any) => {
-      setUpNewsList(res);
-    })
-    .finally(async () => {
-      const cost = Date.now() - start;
-      if (cost < min_loading_time) {
-        await new Promise((res) => setTimeout(res, min_loading_time - cost));
-      }
-      loading.value = false;
-    })
-    .catch((err: any) => console.error(err));
-}, 500);
+  if (currentPageNumber.value > 1) {
+    currentPageNumber.value--;
+  }
+};
 
-const nextPageHandle = useThrottleFn(() => {
+const nextPageHandle = () => {
   if (nextPage.value == null || nextPage.value == "") {
     return;
   }
-  loading.value = true;
-  const start = Date.now();
-  currentPageNumber.value++;
-  initializeNewsList();
-  request
-    .get(nextPage.value)
-    .then((res: any) => {
-      setUpNewsList(res);
-    })
-    .finally(async () => {
-      const cost = Date.now() - start;
-      const min_loading_time = 250;
-      if (cost < min_loading_time) {
-        await new Promise((res) => setTimeout(res, min_loading_time - cost));
-      }
-      loading.value = false;
-    })
-    .catch((err: any) => console.error(err));
-}, 500);
+  if (currentPageNumber.value < total_pages) {
+    currentPageNumber.value++;
+  }
+};
+
+watch(
+  currentPageNumber,
+  (page_number: number) => {
+    initializeNewsList();
+    fetchNews(page_number);
+  },
+  { immediate: true }
+);
+
+const pageJumpHandle = (page_number: number) => {
+  currentPageNumber.value = page_number;
+};
 </script>
