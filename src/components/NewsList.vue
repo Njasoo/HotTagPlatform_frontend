@@ -96,6 +96,12 @@ const loading = ref(false);
 const currentPageNumber = ref(1);
 const prevPage = ref("");
 const nextPage = ref("");
+const source2zh: { key: string; value: string }[] = [
+  { key: "weibo", value: "微博" },
+  { key: "tieba", value: "贴吧" },
+  { key: "bilibili", value: "哔哩哔哩" },
+  { key: "zhihu", value: "知乎" },
+];
 // const selectedPlatform = ref("哔哩哔哩");
 interface NewsItem {
   // 规定出来看的，实际上运行不会做类型检查，直接被覆盖了，不过别人一看代码就知道我这个数组里面要存什么东西
@@ -196,9 +202,19 @@ onMounted(() => {
     .catch((err: any) => console.error(err));
 });
 
+const changePlatform = (key: string) => {
+  for (const item of source2zh) {
+    if (item.key == key) {
+      newsStore.current_platform_zh = item.value;
+    }
+  }
+};
+
 watch(
   () => props.selectedValue,
-  () => {
+  (newVal: string) => {
+    console.log("now_平台:", newVal);
+    changePlatform(newVal);
     fetchNews();
   }
 );
