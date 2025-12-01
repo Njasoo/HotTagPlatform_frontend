@@ -164,8 +164,8 @@ const fetchNews = useDebounceFn((page_number: number = 1) => {
     }
   }
   const start = Date.now();
-  loading.value = true;
   initializeNewsList();
+  loading.value = true;
   getHotItems(newsStore.current_platform, current_categories, page_number)
     .then((res: any) => {
       console.log(res.data.results);
