@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto bg-base-200 min-h-screen">
+  <div class="w-full bg-base-200 min-h-screen">
     <nav
       class="overflow-x-auto px-6 py-4 shadow-sm bg-base-100 flex justify-between items-center whitespace-nowrap"
     >
@@ -143,25 +143,25 @@ watch(
         selectedPlatform.value = item.name;
       }
     }
-  }
+  },
 );
 
 const searchHandle = () => {
   if (newsStore.current_platform == "zhihu") {
     window.open(
       `https://www.zhihu.com/search?type=content&q=${searchText.value}`,
-      "_blank"
+      "_blank",
     );
   } else if (newsStore.current_platform == "weibo") {
     window.open(`https://s.weibo.com/weibo?q=${searchText.value}`, "_blank");
   } else if (newsStore.current_platform == "bilibili") {
     window.open(
       `https://search.bilibili.com/all?keyword=${searchText.value}`,
-      "_blank"
+      "_blank",
     );
   } else if (newsStore.current_platform == "tieba") {
     window.open(
-      `https://tieba.baidu.com/f?ie=utf-8&kw=${searchText.value}&fr=search`
+      `https://tieba.baidu.com/f?ie=utf-8&kw=${searchText.value}&fr=search`,
     );
   }
 };
